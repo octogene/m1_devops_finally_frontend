@@ -41,6 +41,25 @@ jobs:
 
       - run: yarn run build
 
+      - run: cp -r dist/ /tmp/frontend
+
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - frontend
+
+  frontend-deploy:
+    docker:
+      - image: circleci/node:dubnium-browsers
+    working_directory: ~/deploy-frontend
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Deploy frontend
+          command: |
+            npx netlify-cli deploy --site $NETLIFY_SITE_ID --auth $NETLIFY_AUTH_TOKEN --prod --dir=/tmp/frontend
+
 workflows:
   version: 2
   build_and_test:
